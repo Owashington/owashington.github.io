@@ -1,0 +1,230 @@
+---
+title: "Assignment1"
+author: "Ophelia Washington"
+date: "9/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Load library:
+```{r}
+library(tidyverse)
+```
+
+Load data for 2017-2020 and then 2021:
+```{r}
+years <- 2017:2020
+quarters <- 1:4
+types <- "Electric"
+
+pge_20_elec <- NULL
+
+  #Loop through years
+  for (year in years) {
+  #Loop through quarters  
+    for (quarter in quarters) {
+  #Loop through elec then gas
+      for (type in types) {
+          
+          filename <- 
+            paste0(
+              "PGE_",
+              year,
+              "_Q",
+              quarter,
+              "_",
+              "Electric",
+              "UsageByZip.csv"
+            )
+      
+          print(filename)
+          
+          temp <- read_csv(filename)
+          
+          pge_20_elec <- rbind(pge_20_elec, temp)
+          
+          saveRDS(pge_20_elec, "pge_20_elec.rds")
+      }
+    }
+  }
+
+
+years <- 2021
+quarters <- 1:2
+types <- "Electric"
+
+pge_20_elec <- NULL
+
+  #Loop through years
+  for (year in years) {
+  #Loop through quarters  
+    for (quarter in quarters) {
+  #Loop through elec then gas
+      #for (type in types) {
+          
+          filename <- 
+            paste0(
+              "PGE_",
+              year,
+              "_Q",
+              quarter,
+              "_",
+              "Electric",
+              "UsageByZip.csv"
+            )
+      
+          print(filename)
+          
+          temp <- read_csv(filename)
+          
+          pge_20_elec <- rbind(pge_20_elec, temp)
+          
+          saveRDS(pge_20_elec, "pge_20_elec.rds")
+      #}
+    }
+  }
+
+#I tried looping through the types but I got so held up at the filter part so I am just going to do a separate chunk for gas
+years <- 2017:2020
+quarters <- 1:4
+types <- "Gas"
+
+pge_20_gas <- NULL
+
+  #Loop through years
+  for (year in years) {
+  #Loop through quarters  
+    for (quarter in quarters) {
+  #Loop through elec then gas
+      for (type in types) {
+          
+          filename <- 
+            paste0(
+              "PGE_",
+              year,
+              "_Q",
+              quarter,
+              "_",
+              type,
+              "UsageByZip.csv"
+            )
+      
+          print(filename)
+          
+          temp <- read_csv(filename)
+          
+          pge_20_gas <- rbind(pge_20_gas, temp)
+          
+          saveRDS(pge_20_gas, "pge_20_gas.rds")
+      }
+    }
+  }
+
+
+years <- 2021
+quarters <- 1:2
+types <- "Gas"
+
+pge_20_gas <- NULL
+
+  #Loop through years
+  for (year in years) {
+  #Loop through quarters  
+    for (quarter in quarters) {
+  #Loop through elec then gas
+      for (type in types) {
+          
+          filename <- 
+            paste0(
+              "PGE_",
+              year,
+              "_Q",
+              quarter,
+              "_",
+              type,
+              "UsageByZip.csv"
+            )
+      
+          print(filename)
+          
+          temp <- read_csv(filename)
+          
+          pge_20_gas <- rbind(pge_20_gas, temp)
+          
+          saveRDS(pge_20_elec, "pge_20_gas.rds")
+      }
+    }
+  }
+```
+
+Manipulate to convert the units
+```{r}
+pge_20_elec_convert <-
+     mutate(pge_20_elec, TOTALKBTU = TOTALKWH * 3412.14)
+
+#The if function thing I did above was not working for gas for some reason, I think it's an issue with Types
+pge_20_gas_convert <-
+  mutate(pge_20_gas, TOTALKBTU = TOTALTHM * 99.9761)
+
+```
+
+
+Filtering the columns in electricity and gas
+Choosing which columns to keep
+Then combining them
+```{r}
+pge_elec_filter <- filter(pge_20_elec_convert, CUSTOMERCLASS %in% c("Elec- Residential","Elec- Commercial"))
+
+pge_gas_filter <- filter(pge_20_gas_convert, CUSTOMERCLASS %in% c("Gas- Residential", "Elec- Commercial"))
+
+pge_elec_select <-
+  select(
+    pge_elec_filter,
+    -c(YEAR, COMBINED, AVERAGEKWH, TOTALKWH)
+  )
+
+pge_gas_select <-
+  select(
+    pge_gas_filter,
+    -c(YEAR, COMBINED, AVERAGETHM, TOTALTHM)
+  )
+
+pge_20_elec_gas <- rbind(pge_elec_select,pge_gas_select)
+saveRDS(pge_20_elec_gas, "pge_20_elec_gas.rds")
+```
+
+Building the plot
+```{r}
+library(tidyverse)
+library(plotly)
+library(ggplot2)
+str(pge_20_elec_gas)
+
+
+```
+
+
+
+
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
